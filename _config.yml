@@ -11,7 +11,7 @@ site-twitter: #if your site has a twitter account, enter it here
 # Author Settings
 author: Tiago Souza # add your name
 author-img: tiago-souza.png # add your photo
-about-author: I am a PhD economist, curious about economics, mathematics and programming. Solving real world problems is what I love doing. Based in London
+about-author: I am a PhD economist, curious about applied economics and mathematics. Solving real world problems is what I love doing. Based in London
 social-twitter: # add your Twitter handle
 social-facebook: # add your Facebook handle
 social-github: tiagocmsouza # add your Github handle
@@ -19,7 +19,7 @@ social-linkedin: # add your Linkedin handle
 social-email: # add your Email address
 
 # Disqus
-discus-identifier: mr-brown # add your discus identifier
+discus-identifier: #mr-brown # add your discus identifier
 
 # Tracker
 analytics: # Google Analytics
@@ -31,7 +31,7 @@ plugins:
   - jekyll-paginate
   - jemoji
 
-paginate: 4
+paginate: 6
 paginate_path: "/page/:num"
 
 exclude: ["node_modules", "gulpfile.js", "package.json", "yarn.lock"]
