@@ -22,7 +22,7 @@ Convexity and Cones are seen as generalizations of the concepts of subspaces and
 
 The axioms of vector spaces describe algebraic properties only (such as addition, scalar multiplication and linear combinations), which makes the introduction of a measure of distance necessary to explore topological concepts like opennes, closure, convergence and completeness. In vectoral spaces this is usually done by introducing a norm, an abstraction of the concept of length. Moreover, it can be shown that interior and taking closure preserves convexity, subspaces, linear varieties and cones.
 
-Classical examples include $l_{p}$ (all sequence of real numbers for which )
+Classical examples include $l_{p}$, the sequence of real numbers $\\{x_{1}, x_{2}, \dots\\}$ for which $\sum_{i=1}^{\infty}{\|x_{i}\|^p} < \infty$ and the norm is defined as $\|\|x\|\|_{p} = \left( \sum_{i=1} \right)^\frac{1}{p}$.
 
 A key concept of analysis is convergence, usually to prove the existence of a vector satisfying some desired property. To do so, it is common to define a sequence of vectors converging to a limit and, in many cases, this limit can be shown to satisfy that desired property.
 
