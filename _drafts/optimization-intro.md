@@ -6,10 +6,10 @@ description: An introductory and intuitive view of Optimization Theory
 #img:  
 ---
 
-[Section test](#test)
+- [Introduction](#introduction)
 
-<a name="test"/>
-## Section test
+<a name="introduction"/>
+### Introduction
 
 The field of optimization can be unified by a few geometric principles of linear vector space theory, which convey enough insight to solve complex problems. Indeed, the extension of these intuitive geometric insights to infinife-dimensional spaces is the reason why studing functional analysis becomes useful. Functional analysis should not be feared, however, as most of its main results are expressed as abstractions of intuitive geometric properties of finite-dimensional spaces. Once this intuition is build, it widens the range of problems that optimization theory can be applied to. 
 
@@ -41,5 +41,6 @@ The vector space of continuous functions with the norm \$ \|\|x\|\| = \int\_{0}^
 
 A fundamental question is to establish the existence of a solution to an optimization problem, to which the Weierstrass theorem, stating that a continuous funcion on a compact (closed and bounded) set has a maximum and a minimum, is of great use. It can be extended to compact sets in a normed space in infinite-dimensional problems, but compactness is too restrictive in infinite-dimensional normed spaces, making the Weierstrass theorem of limited use in these settings.
 
-- End denseness and separability
+Another important concept is denseness. A set \$D\$ is dense in \$X\$ if for every \$x \in X\$, there are points in \$D\$ arbitrarily close to it. Hence, a sequence converging to a \$x \in X\$ can be contructed from elements of \$D\$. Equivalently, denseness imply that the closure of \$D\$ is \$X\$. Classic examples are the set of rationals in the real line and the space of polynomials in the space \$C[a,b]\$. Finally, the concept of separability, which states that a normed space is separable if it contains a countable dense set. For example, the collection of vectors \$x=(x\_{1}, x\_{2}, \dots, x\_{n}\$ with rational components is countable and dense in \$E^{n}\$. Also, \$l\_{p}\$ and \$L\_{p}\$ spaces with \$1 \leq p < \infty\$ are separable --- \$D\$ is the countable set of all finitely nonzero sequences with rational components for the former, and the countable set of all polynomials with rational coefficients for the latter. Both \$l\_{\infty}\$ and \$L\_{\infty}\$ are not separable.
+
 - Split sections
