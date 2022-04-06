@@ -7,6 +7,7 @@ description: An introductory and intuitive view of Optimization Theory
 ---
 
 - [Introduction](#introduction)
+- [Hilbert Space](#hilbert)
 
 <a name="introduction"/>
 ### Introduction
@@ -42,5 +43,22 @@ The vector space of continuous functions with the norm \$ \|\|x\|\| = \int\_{0}^
 A fundamental question is to establish the existence of a solution to an optimization problem, to which the Weierstrass theorem, stating that a continuous funcion on a compact (closed and bounded) set has a maximum and a minimum, is of great use. It can be extended to compact sets in a normed space in infinite-dimensional problems, but compactness is too restrictive in infinite-dimensional normed spaces, making the Weierstrass theorem of limited use in these settings.
 
 Another important concept is denseness. A set \$D\$ is dense in \$X\$ if for every \$x \in X\$, there are points in \$D\$ arbitrarily close to it. Hence, a sequence converging to a \$x \in X\$ can be contructed from elements of \$D\$. Equivalently, denseness imply that the closure of \$D\$ is \$X\$. Classic examples are the set of rationals in the real line and the space of polynomials in the space \$C[a,b]\$. Finally, the concept of separability, which states that a normed space is separable if it contains a countable dense set. For example, the collection of vectors \$x=(x\_{1}, x\_{2}, \dots, x\_{n}\$ with rational components is countable and dense in \$E^{n}\$. Also, \$l\_{p}\$ and \$L\_{p}\$ spaces with \$1 \leq p < \infty\$ are separable --- \$D\$ is the countable set of all finitely nonzero sequences with rational components for the former, and the countable set of all polynomials with rational coefficients for the latter. Both \$l\_{\infty}\$ and \$L\_{\infty}\$ are not separable.
+
+<a name="hilbert"/>
+### Hilbert Space
+
+A key concept to the projection theorem, one of the most important optimization principles, is that of orthogonality, not generally available in normed spaces. A Hilbert space is a special for of normed space, one in wchih there is an inner product defined over it and orthogonality between two vectors occur if their inner product is zero. The concepts of orthonormal bases, Fourier series, and least-squares minimization all have natural settings in Hilbert spaces.
+
+In such settings, the norm is defined as \$\|\|x\|\| = \sqrt{(x\|x)}\$, where \$(x,y)\$ is the inner product between \$x\$ and \$y\$ --- a scalar satisfying symmetry [\$(x\|y) = (y\|x)\$], linearity in both entries [\$(\alpha x + \beta y\|z) = \alpha (x\|z) + \beta (y\|z)\$] and non-negativity [\$(x\|x) \geq 0\$ and \$(x\|x) = 0\$ if and only if \$x = 0\$]. The Cauchy-Schwartz Inequality give more intuition that inner products define angles between vectors, which states that for all \$x, y\$ in an inner product space, \$\|(x,\|y) \leq \|\|x\|\|\|\|y\|\|\$, with equality holding if and only if \$x = \lambda y\$ or \$y = 0\$. These are called pre-Hilbert spaces.
+
+Since a pre-Hilbert space is a special kind of of normed linear space, convergence, closure and completeness apply in these spaces. In fact, a Hilbert space is defined as a complete pre-Hilbert space, which is a Banach space equipped with an inner product that induces a norm. The spaces \$E^{n}\$ of n-tuples, \$l_{2}\$ and \$L_{2}\$ spacesare Hilbert spaces. It is also important to note that inner products are contiuous real functions.
+
+The Classical Projection Theorem states that for any vector \$v\$ in a Hilbert space \$V\$, there is a unique vector \$u\_{0} \in U\$, a closed subspace of \$V\$, such that \$\|\| v - u\_{0} \|\| \leq \|\| v - u \|\|$ for all \$u \in U\$. Moreover, \$v - u\_{0}\$ being orthogonal to \$U\$ is a necessary and sufficient condition for \$u\_{0}\$ to be the unique minimizing vector. There is an extended version of the theorem valid in a large class of Banach spaces, but the theorem cannot be extended to arbitrary Banach spaces.
+
+Another important structural property of Hilbert spaces, which comes as an application of the projection theorem, is that of orthogonal complements. It states that, given any closed subset of a Hilbert space \$V\$, any vector can be uniquely written as the sum of a vector in \$V\$ and another vector in the subspace orthogonal to it. The orthogonal complement of any set \$V\$ is a closed subspace: the inner product guarantees that all linear combinations of elements in \$V^{\perp}\$ is still an element of that orthogonal space and the closure comes from the continuity of the inner product --- as the limit of any sequence of vectors orthogonal to \$V\$, i.e. with \$0\$ inner product, would have zero inner product. What motivates calling it ``orthogonal complement'' comes from the fact that the orthogonal complement of any closed subset in a Hilbert space contains additional vectors to generate the entire space --- so that, for any closed linear subspace \$U\$ of Hilbert space \$V\$, \$V = U \oplus U^{\perp}\$ and \$U = U^{\perp \perp}\$. Therefore, given a vector \$v\$ and closed subspace \$U\$ in a Hilbert space, the vector \$u_{v} \in U\$ such that \$v - u_{v} \in U^{\perp}\$ is called the orthogonal projection of \$v\$ onto \$U\$.
+
+Orthogonal sets of vectors are convenient is various problems in Hilber spaces. One of the interesting properties is that a set of nonzero orthogonal vectors is linearly independent. Indeed, in Hilbert spaces, orthonormal sets are favored over linearly independent sets and the Gram-Schmidt orthogonalization procedure, to which the Projection Theorem is crucial, constructs an orthonormal set from a linearly independent set.
+
+
 
 - Split sections
