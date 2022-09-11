@@ -1,0 +1,44 @@
+---
+title: "FX Decomposition using Dynamic Factor Models"
+author: "Tiago Souza"
+date: "2022-09-11"
+categories: [DFM, python]
+---
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import eurostat
+from datetime import datetime
+```
+
+This post is to apply a Dynamic Factor Model to uncover common trends in currencies as well as idiosyncratic shocks that some countries might be facing.
+
+$$
+\begin{aligned}
+x^{i}_{t} = \alpha^{i} + \sum_{j}{\beta^{i}_{j} f_{j} + \varepsilon^{i}_{t}}, \quad i = 1 \dots n
+\end{aligned}
+$$
+
+```{python}
+df = eurostat.get_data_df('ert_bil_eur_d', flags=False)
+df.rename(columns = {'currency\\time': 'currency'}, inplace = True)
+
+list_statinfo = ['AVG']
+list_currency = ['AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'GBP', 'HUF', 'IDR', 'JPY', 'MXN', 'NZD', 'PLN', 'TRY', 'USD', 'ZAR']
+
+df = df[(df['statinfo'].isin(list_statinfo)) & (df['currency'].isin(list_currency))]
+df.drop(columns = ['unit', 'statinfo'], inplace = True)
+
+df = pd.melt(df, id_vars = ['currency'], var_name = 'date')
+df['date'] = df['date'].apply(lambda x: datetime.strptime(x, '%YM%mD%d'))
+df.set_index(['date', 'currency'], inplace = True)
+
+df = df.unstack()
+df[('value', 'EUR')] = 1
+df = df.mul(1 / df.loc[:,('value', 'USD')], axis = 0)
+df.drop('USD', axis = 1, level = 'currency', inplace = True)
+
+print(df)
+```
