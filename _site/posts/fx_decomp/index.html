@@ -118,6 +118,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     "search-submit-button-title": "Submit"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
@@ -199,7 +202,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> eurostat</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> statsmodels.api <span class="im">as</span> sm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>This post is to apply a Dynamic Factor Model to uncover common trends in currencies as well as idiosyncratic shocks that some countries might be facing.</p>
 <p><span class="math display">\[
@@ -209,71 +213,292 @@ x^{i}_{t} = \alpha^{i} + \sum_{j}{\beta^{i}_{j} f_{j} + \varepsilon^{i}_{t}}, \q
 \]</span></p>
 <div class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> eurostat.get_data_df(<span class="st">'ert_bil_eur_d'</span>, flags<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df.rename(columns <span class="op">=</span> {<span class="st">'currency</span><span class="ch">\\</span><span class="st">time'</span>: <span class="st">'currency'</span>}, inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df.rename(columns <span class="op">=</span> {<span class="st">'currency</span><span class="ch">\\</span><span class="st">TIME_PERIOD'</span>: <span class="st">'currency'</span>}, inplace <span class="op">=</span> <span class="va">True</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>list_statinfo <span class="op">=</span> [<span class="st">'AVG'</span>]</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>list_currency <span class="op">=</span> [<span class="st">'AUD'</span>, <span class="st">'BRL'</span>, <span class="st">'CAD'</span>, <span class="st">'CHF'</span>, <span class="st">'CNY'</span>, <span class="st">'CZK'</span>, <span class="st">'GBP'</span>, <span class="st">'HUF'</span>, <span class="st">'IDR'</span>, <span class="st">'JPY'</span>, <span class="st">'MXN'</span>, <span class="st">'NZD'</span>, <span class="st">'PLN'</span>, <span class="st">'TRY'</span>, <span class="st">'USD'</span>, <span class="st">'ZAR'</span>]</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[(df[<span class="st">'statinfo'</span>].isin(list_statinfo)) <span class="op">&amp;</span> (df[<span class="st">'currency'</span>].isin(list_currency))]</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>df.drop(columns <span class="op">=</span> [<span class="st">'unit'</span>, <span class="st">'statinfo'</span>], inplace <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.melt(df, id_vars <span class="op">=</span> [<span class="st">'currency'</span>], var_name <span class="op">=</span> <span class="st">'date'</span>)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'date'</span>] <span class="op">=</span> df[<span class="st">'date'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: datetime.strptime(x, <span class="st">'%YM%mD</span><span class="sc">%d</span><span class="st">'</span>))</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>df.set_index([<span class="st">'date'</span>, <span class="st">'currency'</span>], inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>list_currency <span class="op">=</span> [<span class="st">'AUD'</span>, <span class="st">'BRL'</span>, <span class="st">'CAD'</span>, <span class="st">'CHF'</span>, <span class="st">'CNY'</span>, <span class="st">'CZK'</span>, <span class="st">'GBP'</span>, <span class="st">'HUF'</span>, <span class="st">'IDR'</span>, <span class="op">\</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>     <span class="st">'JPY'</span>, <span class="st">'MXN'</span>, <span class="st">'NZD'</span>, <span class="st">'PLN'</span>, <span class="st">'TRY'</span>, <span class="st">'USD'</span>, <span class="st">'ZAR'</span>]</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[(df[<span class="st">'statinfo'</span>].isin(list_statinfo)) <span class="op">&amp;</span> <span class="op">\</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>     (df[<span class="st">'currency'</span>].isin(list_currency))]</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>df.drop(columns <span class="op">=</span> [<span class="st">'unit'</span>, <span class="st">'statinfo'</span>, <span class="st">'freq'</span>], inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.melt(df, id_vars <span class="op">=</span> [<span class="st">'currency'</span>], var_name <span class="op">=</span> <span class="st">'date'</span>)</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.unstack()</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>df[(<span class="st">'value'</span>, <span class="st">'EUR'</span>)] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.mul(<span class="dv">1</span> <span class="op">/</span> df.loc[:,(<span class="st">'value'</span>, <span class="st">'USD'</span>)], axis <span class="op">=</span> <span class="dv">0</span>)</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>df.drop(<span class="st">'USD'</span>, axis <span class="op">=</span> <span class="dv">1</span>, level <span class="op">=</span> <span class="st">'currency'</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'date'</span>] <span class="op">=</span> df[<span class="st">'date'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: datetime.strptime(x, <span class="st">'%Y-%m-</span><span class="sc">%d</span><span class="st">'</span>))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>df.set_index([<span class="st">'date'</span>, <span class="st">'currency'</span>], inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.unstack()</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>df[(<span class="st">'value'</span>, <span class="st">'EUR'</span>)] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.mul(<span class="dv">1</span> <span class="op">/</span> df.loc[:,(<span class="st">'value'</span>, <span class="st">'USD'</span>)], axis <span class="op">=</span> <span class="dv">0</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>df.drop(<span class="st">'USD'</span>, axis <span class="op">=</span> <span class="dv">1</span>, level <span class="op">=</span> <span class="st">'currency'</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>list_currency.remove(<span class="st">'USD'</span>)</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.stack()</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>df.reset_index(level <span class="op">=</span> <span class="st">'currency'</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.pivot(columns <span class="op">=</span> <span class="st">'currency'</span>, values <span class="op">=</span> <span class="st">'value'</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">#df = df.resample('M').last()</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>df.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>currency</th>
+      <th>AUD</th>
+      <th>BRL</th>
+      <th>CAD</th>
+      <th>CHF</th>
+      <th>CNY</th>
+      <th>CZK</th>
+      <th>EUR</th>
+      <th>GBP</th>
+      <th>HUF</th>
+      <th>IDR</th>
+      <th>JPY</th>
+      <th>MXN</th>
+      <th>NZD</th>
+      <th>PLN</th>
+      <th>TRY</th>
+      <th>ZAR</th>
+    </tr>
+    <tr>
+      <th>date</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2023-01-05</th>
+      <td>1.463541</td>
+      <td>5.382511</td>
+      <td>1.350439</td>
+      <td>0.928120</td>
+      <td>6.873220</td>
+      <td>22.665786</td>
+      <td>0.943307</td>
+      <td>0.832969</td>
+      <td>374.379775</td>
+      <td>15605.197623</td>
+      <td>132.959155</td>
+      <td>19.376663</td>
+      <td>1.587775</td>
+      <td>4.405245</td>
+      <td>18.770116</td>
+      <td>17.097444</td>
+    </tr>
+    <tr>
+      <th>2023-01-06</th>
+      <td>1.484762</td>
+      <td>5.336571</td>
+      <td>1.364857</td>
+      <td>0.939429</td>
+      <td>6.861429</td>
+      <td>22.908571</td>
+      <td>0.952381</td>
+      <td>0.842619</td>
+      <td>378.057143</td>
+      <td>15684.095238</td>
+      <td>134.571429</td>
+      <td>19.299524</td>
+      <td>1.608476</td>
+      <td>4.471429</td>
+      <td>18.768095</td>
+      <td>17.342095</td>
+    </tr>
+    <tr>
+      <th>2023-01-09</th>
+      <td>1.444091</td>
+      <td>5.280011</td>
+      <td>1.336855</td>
+      <td>0.922307</td>
+      <td>6.782536</td>
+      <td>22.428945</td>
+      <td>0.934929</td>
+      <td>0.823186</td>
+      <td>371.400524</td>
+      <td>15577.711294</td>
+      <td>132.152206</td>
+      <td>19.149682</td>
+      <td>1.565165</td>
+      <td>4.390707</td>
+      <td>18.775617</td>
+      <td>17.021223</td>
+    </tr>
+    <tr>
+      <th>2023-01-10</th>
+      <td>1.456309</td>
+      <td>5.266343</td>
+      <td>1.341229</td>
+      <td>0.923995</td>
+      <td>6.782803</td>
+      <td>22.366875</td>
+      <td>0.932575</td>
+      <td>0.823743</td>
+      <td>372.097361</td>
+      <td>15550.750723</td>
+      <td>132.351021</td>
+      <td>19.145668</td>
+      <td>1.574093</td>
+      <td>4.378439</td>
+      <td>18.777954</td>
+      <td>17.071155</td>
+    </tr>
+    <tr>
+      <th>2023-01-11</th>
+      <td>1.450451</td>
+      <td>5.195869</td>
+      <td>1.342607</td>
+      <td>0.927422</td>
+      <td>6.774635</td>
+      <td>22.356937</td>
+      <td>0.930492</td>
+      <td>0.825095</td>
+      <td>371.359449</td>
+      <td>15457.653299</td>
+      <td>132.697497</td>
+      <td>19.071090</td>
+      <td>1.573648</td>
+      <td>4.356472</td>
+      <td>18.776682</td>
+      <td>17.011910</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>list_em <span class="op">=</span> [<span class="st">'BRL'</span>, <span class="st">'CHF'</span>, <span class="st">'CZK'</span>, <span class="st">'HUF'</span>, <span class="st">'IDR'</span>, <span class="st">'MXN'</span>, <span class="st">'PLN'</span>, <span class="st">'TRY'</span>, <span class="st">'ZAR'</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>list_dm <span class="op">=</span> <span class="bu">list</span>(<span class="bu">set</span>(list_currency) <span class="op">-</span> <span class="bu">set</span>(list_em))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>factors_mq <span class="op">=</span> {x: [<span class="st">'usd'</span>, <span class="st">'em'</span>] <span class="cf">if</span> x <span class="kw">in</span> list_em <span class="cf">else</span> [<span class="st">'usd'</span>, <span class="st">'dm'</span>] <span class="cf">for</span> x <span class="kw">in</span> list_currency}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df_est <span class="op">=</span> df.loc[<span class="st">'2000-01-01'</span>:].copy()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>endog_em <span class="op">=</span> df_est[list_em].pct_change()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>endog_dm <span class="op">=</span> df_est[list_dm].pct_change()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>plt.plot(endog_em)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>model_em <span class="op">=</span> sm.tsa.DynamicFactor(endog_em, k_factors<span class="op">=</span><span class="dv">1</span>, factor_order<span class="op">=</span><span class="dv">1</span>, error_order<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>result_em <span class="op">=</span> model_em.fit(disp<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>model_dm <span class="op">=</span> sm.tsa.DynamicFactor(endog_dm, k_factors<span class="op">=</span><span class="dv">1</span>, factor_order<span class="op">=</span><span class="dv">1</span>, error_order<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>result_dm <span class="op">=</span> model_dm.fit(disp<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/statsmodels/tsa/base/tsa_model.py:471: ValueWarning: A date index has been provided, but it has no associated frequency information and so will be ignored when e.g. forecasting.
+  self._init_dates(dates, freq)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/statsmodels/base/model.py:604: ConvergenceWarning: Maximum Likelihood optimization failed to converge. Check mle_retvals
+  warnings.warn("Maximum Likelihood optimization failed to "</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/statsmodels/tsa/base/tsa_model.py:471: ValueWarning: A date index has been provided, but it has no associated frequency information and so will be ignored when e.g. forecasting.
+  self._init_dates(dates, freq)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/statsmodels/base/model.py:604: ConvergenceWarning: Maximum Likelihood optimization failed to converge. Check mle_retvals
+  warnings.warn("Maximum Likelihood optimization failed to "</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-5-output-6.png" width="595" height="411"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df_est[<span class="st">'factor_em'</span>] <span class="op">=</span> result_em.factors.smoothed[<span class="dv">0</span>]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>df_est[<span class="st">'factor_dm'</span>] <span class="op">=</span> result_dm.factors.smoothed[<span class="dv">0</span>]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>endog_global <span class="op">=</span> df_est[[<span class="st">'factor_em'</span>, <span class="st">'factor_dm'</span>]]</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>plt.plot(endog_global)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>model_global <span class="op">=</span> sm.tsa.DynamicFactor(endog_global, k_factors<span class="op">=</span><span class="dv">1</span>, factor_order<span class="op">=</span><span class="dv">1</span>, error_order<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>result_global <span class="op">=</span> model_global.fit(disp<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/statsmodels/tsa/base/tsa_model.py:471: ValueWarning: A date index has been provided, but it has no associated frequency information and so will be ignored when e.g. forecasting.
+  self._init_dates(dates, freq)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/site-packages/statsmodels/base/model.py:604: ConvergenceWarning: Maximum Likelihood optimization failed to converge. Check mle_retvals
+  warnings.warn("Maximum Likelihood optimization failed to "</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-6-output-4.png" width="595" height="411"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>df_est[<span class="st">'factor_global'</span>] <span class="op">=</span> result_global.factors.smoothed[<span class="dv">0</span>]</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>plt.plot(df_est[<span class="st">'factor_global'</span>])</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>plt.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>&lt;matplotlib.legend.Legend at 0x13ebeb6d0&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="index_files/figure-html/cell-7-output-3.png" width="582" height="411"></p>
+</div>
+</div>
+<div class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># model = sm.tsa.DynamicFactorMQ(</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co">#     endog_m, endog_quarterly=endog_q,</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="co">#     factors=factors, factor_orders=factor_orders,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     factor_multiplicities=factor_multiplicities)</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_est[[<span class="st">'factor_em'</span>, <span class="st">'factor_dm'</span>, <span class="st">'factor_global'</span>]].tail(<span class="dv">15</span>))</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> pearsonr</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>corr, _ <span class="op">=</span> pearsonr(df_est[<span class="st">'factor_em'</span>], df_est[<span class="st">'factor_dm'</span>])</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">'Pearsons correlation: </span><span class="sc">%.3f</span><span class="st">'</span> <span class="op">%</span> corr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>               value                                                     \
-currency         AUD       BRL       CAD       CHF       CNY        CZK   
-date                                                                      
-1974-07-01       NaN       NaN       NaN  2.995941       NaN        NaN   
-1974-07-02       NaN       NaN       NaN  2.990800       NaN        NaN   
-1974-07-03       NaN       NaN       NaN  2.966785       NaN        NaN   
-1974-07-04       NaN       NaN       NaN  2.977922       NaN        NaN   
-1974-07-05       NaN       NaN       NaN  2.975646       NaN        NaN   
-...              ...       ...       ...       ...       ...        ...   
-2022-09-05  1.473387  5.182157  1.314819  0.982560  6.932258  24.820565   
-2022-09-06  1.475725  5.167204  1.312349  0.981567  6.959206  24.728042   
-2022-09-07  1.491958  5.248457  1.318867  0.986343  6.977036  24.917552   
-2022-09-08  1.481067  5.199520  1.312219  0.973024  6.950145  24.520931   
-2022-09-09  1.463230  5.183302  1.300627  0.960991  6.920390  24.416360   
-
-                                                                       \
-currency         GBP         HUF           IDR         JPY        MXN   
-date                                                                    
-1974-07-01  0.419092         NaN           NaN         NaN        NaN   
-1974-07-02  0.418334         NaN           NaN         NaN        NaN   
-1974-07-03  0.417764         NaN           NaN         NaN        NaN   
-1974-07-04  0.419530         NaN           NaN         NaN        NaN   
-1974-07-05  0.418713         NaN           NaN         NaN        NaN   
-...              ...         ...           ...         ...        ...   
-2022-09-05  0.870544  407.157258  14902.046371  140.594758  19.979032   
-2022-09-06  0.863648  405.570105  14891.156326  141.931910  19.998489   
-2022-09-07  0.875164  406.504805  14951.411229  144.865959  20.154274   
-2022-09-08  0.865781  395.124388  14878.469378  143.520831  19.995004   
-2022-09-09  0.864365  394.367599  14832.650015  142.601254  19.893522   
-
-                                                                
-currency         NZD       PLN        TRY        ZAR       EUR  
-date                                                            
-1974-07-01       NaN       NaN        NaN        NaN  0.828295  
-1974-07-02       NaN       NaN        NaN        NaN  0.828844  
-1974-07-03       NaN       NaN        NaN        NaN  0.826241  
-1974-07-04       NaN       NaN        NaN        NaN  0.830013  
-1974-07-05       NaN       NaN        NaN        NaN  0.828363  
-...              ...       ...        ...        ...       ...  
-2022-09-05  1.642036  4.774194  18.225000  17.225806  1.008065  
-2022-09-06  1.643131  4.740935  18.225020  17.204371  1.007252  
-2022-09-07  1.665048  4.784016  18.235913  17.458978  1.011634  
-2022-09-08  1.647617  4.711260  18.238186  17.364072  0.999101  
-2022-09-09  1.638272  4.697980  18.238830  17.290576  0.995124  
-
-[12435 rows x 16 columns]</code></pre>
+<pre><code>currency    factor_em  factor_dm  factor_global
+date                                           
+2022-12-21  -0.059927  -0.081435       0.735832
+2022-12-22  -0.022280   0.005360       0.186527
+2022-12-23  -0.002162   0.017472      -0.014107
+2022-12-27   0.041217  -0.045417      -0.248542
+2022-12-28   0.022716  -0.107312       0.049828
+2022-12-29  -0.069029   0.119988       0.364497
+2022-12-30  -0.017344  -0.126943       0.454206
+2023-01-02  -0.000055   0.011553      -0.005445
+2023-01-03   0.156686   0.176762      -1.906100
+2023-01-04  -0.145457  -0.232314       1.955902
+2023-01-05   0.014978   0.019381      -0.183115
+2023-01-06   0.127845   0.171858      -1.619197
+2023-01-09  -0.202377  -0.372399       2.822352
+2023-01-10  -0.006585   0.084640      -0.153977
+2023-01-11  -0.029203  -0.029067       0.331555
+Pearsons correlation: 0.698</code></pre>
 </div>
 </div>
 

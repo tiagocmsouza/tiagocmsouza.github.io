@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import eurostat
 from datetime import datetime
+import statsmodels.api as sm
 ```
 
 This post is to apply a Dynamic Factor Model to uncover common trends in currencies as well as idiosyncratic shocks that some countries might be facing.
@@ -23,22 +24,61 @@ $$
 
 ```{python}
 df = eurostat.get_data_df('ert_bil_eur_d', flags=False)
-df.rename(columns = {'currency\\time': 'currency'}, inplace = True)
+df.rename(columns = {'currency\\TIME_PERIOD': 'currency'}, inplace = True)
 
 list_statinfo = ['AVG']
-list_currency = ['AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'GBP', 'HUF', 'IDR', 'JPY', 'MXN', 'NZD', 'PLN', 'TRY', 'USD', 'ZAR']
+list_currency = ['AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'GBP', 'HUF', 'IDR', \
+     'JPY', 'MXN', 'NZD', 'PLN', 'TRY', 'USD', 'ZAR']
 
-df = df[(df['statinfo'].isin(list_statinfo)) & (df['currency'].isin(list_currency))]
-df.drop(columns = ['unit', 'statinfo'], inplace = True)
+df = df[(df['statinfo'].isin(list_statinfo)) & \
+     (df['currency'].isin(list_currency))]
+df.drop(columns = ['unit', 'statinfo', 'freq'], inplace = True)
 
 df = pd.melt(df, id_vars = ['currency'], var_name = 'date')
-df['date'] = df['date'].apply(lambda x: datetime.strptime(x, '%YM%mD%d'))
+
+df['date'] = df['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
 df.set_index(['date', 'currency'], inplace = True)
 
 df = df.unstack()
 df[('value', 'EUR')] = 1
 df = df.mul(1 / df.loc[:,('value', 'USD')], axis = 0)
 df.drop('USD', axis = 1, level = 'currency', inplace = True)
+list_currency = [x if x != 'USD' else 'EUR' for x in list_currency]
 
-print(df)
+df = df.stack()
+df.reset_index(level = 'currency', inplace = True)
+df = df.pivot(columns = 'currency', values = 'value')
+df = df.resample('M') \
+     .last() \
+     .pct_change() \
+     .to_period('M')
+
+df.tail()
+```
+
+```{python}
+list_em = ['BRL', 'CHF', 'CZK', 'HUF', 'IDR', 'MXN', 'PLN', 'TRY', 'ZAR']
+
+list_dm = list(set(list_currency) - set(list_em))
+
+factors_mq = {x: ['usd', 'em'] if x in list_em else ['usd', 'dm'] for x in list_currency}
+```
+
+```{python}
+df_est = df.loc['2000-01':].copy()
+
+df_est.plot()
+plt.show()
+
+model = sm.tsa.DynamicFactorMQ(df_est, factors=factors_mq)
+result = model.fit(disp=False)
+```
+
+```{python}
+df_est['factor_usd'] = result.factors.smoothed['usd']
+df_est['factor_em'] = result.factors.smoothed['em']
+df_est['factor_dm'] = result.factors.smoothed['dm']
+
+df_est['factor_usd'].plot()
+plt.show()
 ```
