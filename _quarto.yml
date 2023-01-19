@@ -8,7 +8,9 @@ website:
       - blog.qmd
       - icon: github
         href: https://github.com/
+
 format:
   html:
     theme: flatly
-    css: styles.css
+    mainfont: system-ui
+    css: styles.scss
