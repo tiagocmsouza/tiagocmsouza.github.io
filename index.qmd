@@ -1,11 +1,11 @@
 ---
-title: "Tiago Souza"
+title: "Presentation"
 image: profile.jpg
 about:
   template: broadside
   links:
     - icon: linkedin
-      text: LinkedIn
+      text: LinkeIn
       href: https://linkedin.com
     - icon: github
       text: Github
@@ -13,34 +13,10 @@ about:
 
 ---
 
-Teste
+This website contains notes on applied work that I find interesting as well as intuitive (as much as possible) explanation of mathematics and statistics of topics that I used to just accept.
 
-Teste
+I am an economist curious about applied work in my area, with a view that Economics is a social science capable of providing an explanation to a broad range of themes. 
 
-Teste
+Thinking about the mechanisms to make sense of our world is my passion, but I find it crucial to make sure you have empirial evidence to ratify that mechanics.
 
-Teste
-
-Teste
-
-Teste
-
-Teste
-
-Teste
-
-Teste
-
-Teste
-
-Teste
-
-Teste
-
-Teste
-Teste
-Teste
-Teste
-Teste
-Teste
-Teste
+That explains my willigness to learn programming languages, but do not explain why I still love to undestand the intuition behind theoretical mathematics and statistics.

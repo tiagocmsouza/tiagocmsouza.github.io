@@ -1,0 +1,83 @@
+---
+title: "Currency Beta's with respect to the USD"
+author: "Tiago Souza"
+date: "2023-01-20"
+categories: [econometrics, python]
+---
+
+```{python}
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import eurostat
+from datetime import datetime
+import statsmodels.api as sm
+```
+
+This post is to check whether noise in daily data constitutes a problem to the estimation of currenies' sensitivity with respect to the $USD$, a common exercise done in financial markets.
+
+Assume that there exists a relationship of currency $x_{t}$  with repect to the $USD$ on a dily basis:
+
+$$
+\begin{aligned}
+x_{t} = \alpha_{x} + \beta_{x} USD_{t} + \varepsilon_{t},
+\end{aligned}
+$$
+
+this equation could be estimated to find the parameters of interest (a statistical relationship, with no causal meaning!).
+
+Remeber that the estimated coefficient is given by the simple formula:
+$$
+\begin{aligned}
+\beta_{x} = \frac{\text{cov}(x_{t}, USD_{t})}{\text{var}(USD_{t})}.
+\end{aligned}
+$$
+
+However, estimating this coefficint this way may face difficulties given the large variance of daily data.  Given that, taken the parameters as fixed, nothing prevents one from resampling the data into a different frequency:
+
+$$
+\begin{aligned}
+\frac{1}{T}\sum_{t = 1}^{T}{x_{t}} & = \frac{1}{T}\sum_{t = 1}^{T}{\alpha_{x}} + \frac{1}{T}\sum_{t = 1}^{T}{\beta_{x} USD_{t}} + \frac{1}{T}\sum_{t = 1}^{T}{\varepsilon_{t}} \\
+\quad{} \\
+& \Rightarrow x_{T} = \alpha_{x} + \beta_{x} USD_{T} + \varepsilon_{T}
+\end{aligned}
+$$
+
+Our taks now is to test whether running the regressions over different sample frequencies yields distinct estimated coefficients.
+
+```{python}
+df_daily = eurostat.get_data_df('ert_bil_eur_d', flags=False)
+df_daily.rename(columns = {'currency\\TIME_PERIOD': 'currency'}, inplace = True)
+
+list_statinfo = ['AVG']
+list_currency = ['AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'GBP', 'HUF', 'IDR', 'JPY', 'MXN', 'NZD', 'PLN', 'TRY', 'USD', 'ZAR']
+
+df_daily = df_daily[(df_daily['statinfo'].isin(list_statinfo)) & \
+     (df_daily['currency'].isin(list_currency))]
+df_daily.drop(columns = ['unit', 'statinfo', 'freq'], inplace = True)
+
+df_daily = pd.melt(df_daily, id_vars = ['currency'], var_name = 'date')
+
+df_daily['date'] = df_daily['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
+df_daily.set_index(['date', 'currency'], inplace = True)
+
+df_daily = df_daily.unstack()
+df_daily[('value', 'EUR')] = 1
+df_daily = df_daily.mul(1 / df_daily.loc[:,('value', 'USD')], axis = 0)
+df_daily.drop('USD', axis = 1, level = 'currency', inplace = True)
+list_currency = [x if x != 'USD' else 'EUR' for x in list_currency]
+
+df_daily.tail()
+```
+
+```{python}
+df = df_daily.copy()
+df = df.stack()
+df.reset_index(level = 'currency', inplace = True)
+df = df.pivot(columns = 'currency', values = 'value')
+# df = df.resample('M') \
+#      .last() \
+#      .pct_change() \
+#      .to_period('M')
+df.tail()
+```

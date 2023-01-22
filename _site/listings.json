@@ -9,6 +9,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/fx_regression/index.html",
       "/posts/fx_decomp/index.html",
       "/posts/bayesian_regression/index.html"
     ]
