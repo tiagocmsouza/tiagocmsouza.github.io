@@ -46,38 +46,75 @@ $$
 Our taks now is to test whether running the regressions over different sample frequencies yields distinct estimated coefficients.
 
 ```{python}
+# Download and first inspection 
+
 df_daily = eurostat.get_data_df('ert_bil_eur_d', flags=False)
-df_daily.rename(columns = {'currency\\TIME_PERIOD': 'currency'}, inplace = True)
+
+df_daily.tail(3)
+```
+
+```{python}
+# Create a column with dates, select columns and filter values on interest
 
 list_statinfo = ['AVG']
 list_currency = ['AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'GBP', 'HUF', 'IDR', 'JPY', 'MXN', 'NZD', 'PLN', 'TRY', 'USD', 'ZAR']
 
+df_daily.rename(columns = {'currency\\TIME_PERIOD': 'currency'}, inplace = True)
+
 df_daily = df_daily[(df_daily['statinfo'].isin(list_statinfo)) & \
      (df_daily['currency'].isin(list_currency))]
+
 df_daily.drop(columns = ['unit', 'statinfo', 'freq'], inplace = True)
 
 df_daily = pd.melt(df_daily, id_vars = ['currency'], var_name = 'date')
 
-df_daily['date'] = df_daily['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
-df_daily.set_index(['date', 'currency'], inplace = True)
+print(df_daily.tail(3))
 
-df_daily = df_daily.unstack()
-df_daily[('value', 'EUR')] = 1
-df_daily = df_daily.mul(1 / df_daily.loc[:,('value', 'USD')], axis = 0)
-df_daily.drop('USD', axis = 1, level = 'currency', inplace = True)
-list_currency = [x if x != 'USD' else 'EUR' for x in list_currency]
-
-df_daily.tail()
+print(df_daily.dtypes)
 ```
 
 ```{python}
-df = df_daily.copy()
-df = df.stack()
-df.reset_index(level = 'currency', inplace = True)
-df = df.pivot(columns = 'currency', values = 'value')
-# df = df.resample('M') \
-#      .last() \
-#      .pct_change() \
-#      .to_period('M')
-df.tail()
+# Put date into the correct format and place currencies in columns
+
+df_daily['date'] = df_daily['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
+
+df_daily.set_index(['date', 'currency'], inplace = True)
+
+df_daily = df_daily.unstack()
+
+df_daily = df_daily.droplevel(level=0, axis=1)
+
+df_daily.tail(3)
+```
+
+```{python}
+# Put all currencies with respect to the USD (we downloaded currencies with respect to the EUR)
+
+df_daily['EUR'] = 1
+
+df_daily = df_daily.mul(1 / df_daily.loc[:,'USD'], axis = 0)
+
+df_daily.drop('USD', axis = 1, inplace = True)
+
+df_daily.tail(3)
+```
+
+```{python}
+# Dictionary with dataframes for analysis
+
+freq_list = ['W', 'M', 'Q']
+
+df_dict = {'D': df_daily.pct_change().dropna()}
+
+def resample_data(df, freq):
+    
+    df_resampled = df.resample(freq) \
+        .last() \
+        .pct_change() \
+        .dropna() \
+        .to_period(freq)
+
+    return df_resampled
+
+df_dict.update({freq: resample_data(df_daily, freq) for freq in freq_list})
 ```

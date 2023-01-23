@@ -237,37 +237,162 @@ x_{t} = \alpha_{x} + \beta_{x} USD_{t} + \varepsilon_{t},
 \]</span></p>
 <p>Our taks now is to test whether running the regressions over different sample frequencies yields distinct estimated coefficients.</p>
 <div class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> eurostat.get_data_df(<span class="st">'ert_bil_eur_d'</span>, flags<span class="op">=</span><span class="va">False</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df.rename(columns <span class="op">=</span> {<span class="st">'currency</span><span class="ch">\\</span><span class="st">TIME_PERIOD'</span>: <span class="st">'currency'</span>}, inplace <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>list_statinfo <span class="op">=</span> [<span class="st">'AVG'</span>]</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>list_currency <span class="op">=</span> [<span class="st">'AUD'</span>, <span class="st">'BRL'</span>, <span class="st">'CAD'</span>, <span class="st">'CHF'</span>, <span class="st">'CNY'</span>, <span class="st">'CZK'</span>, <span class="st">'GBP'</span>, <span class="st">'HUF'</span>, <span class="st">'IDR'</span>, <span class="st">'JPY'</span>, <span class="st">'MXN'</span>, <span class="st">'NZD'</span>, <span class="st">'PLN'</span>, <span class="st">'TRY'</span>, <span class="st">'USD'</span>, <span class="st">'ZAR'</span>]</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[(df[<span class="st">'statinfo'</span>].isin(list_statinfo)) <span class="op">&amp;</span> <span class="op">\</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>     (df[<span class="st">'currency'</span>].isin(list_currency))]</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>df.drop(columns <span class="op">=</span> [<span class="st">'unit'</span>, <span class="st">'statinfo'</span>, <span class="st">'freq'</span>], inplace <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.melt(df, id_vars <span class="op">=</span> [<span class="st">'currency'</span>], var_name <span class="op">=</span> <span class="st">'date'</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'date'</span>] <span class="op">=</span> df[<span class="st">'date'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: datetime.strptime(x, <span class="st">'%Y-%m-</span><span class="sc">%d</span><span class="st">'</span>))</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>df.set_index([<span class="st">'date'</span>, <span class="st">'currency'</span>], inplace <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.unstack()</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>df[(<span class="st">'value'</span>, <span class="st">'EUR'</span>)] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.mul(<span class="dv">1</span> <span class="op">/</span> df.loc[:,(<span class="st">'value'</span>, <span class="st">'USD'</span>)], axis <span class="op">=</span> <span class="dv">0</span>)</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>df.drop(<span class="st">'USD'</span>, axis <span class="op">=</span> <span class="dv">1</span>, level <span class="op">=</span> <span class="st">'currency'</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>list_currency <span class="op">=</span> [x <span class="cf">if</span> x <span class="op">!=</span> <span class="st">'USD'</span> <span class="cf">else</span> <span class="st">'EUR'</span> <span class="cf">for</span> x <span class="kw">in</span> list_currency]</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.stack()</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>df.reset_index(level <span class="op">=</span> <span class="st">'currency'</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.pivot(columns <span class="op">=</span> <span class="st">'currency'</span>, values <span class="op">=</span> <span class="st">'value'</span>)</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.resample(<span class="st">'M'</span>) <span class="op">\</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>     .last() <span class="op">\</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>     .pct_change() <span class="op">\</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>     .to_period(<span class="st">'M'</span>)</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>df.tail()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="52">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Download and first inspection </span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df_daily <span class="op">=</span> eurostat.get_data_df(<span class="st">'ert_bil_eur_d'</span>, flags<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>df_daily.tail(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>freq</th>
+      <th>statinfo</th>
+      <th>unit</th>
+      <th>currency\TIME_PERIOD</th>
+      <th>1974-07-01</th>
+      <th>1974-07-02</th>
+      <th>1974-07-03</th>
+      <th>1974-07-04</th>
+      <th>1974-07-05</th>
+      <th>1974-07-08</th>
+      <th>...</th>
+      <th>2023-01-09</th>
+      <th>2023-01-10</th>
+      <th>2023-01-11</th>
+      <th>2023-01-12</th>
+      <th>2023-01-13</th>
+      <th>2023-01-16</th>
+      <th>2023-01-17</th>
+      <th>2023-01-18</th>
+      <th>2023-01-19</th>
+      <th>2023-01-20</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>39</th>
+      <td>D</td>
+      <td>AVG</td>
+      <td>NAC</td>
+      <td>ZAR</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>18.2059</td>
+      <td>18.3054</td>
+      <td>18.2827</td>
+      <td>18.1417</td>
+      <td>18.2482</td>
+      <td>18.445</td>
+      <td>18.6027</td>
+      <td>18.396</td>
+      <td>18.6931</td>
+      <td>18.577</td>
+    </tr>
+    <tr>
+      <th>40</th>
+      <td>D</td>
+      <td>END</td>
+      <td>NAC</td>
+      <td>ALL</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+    <tr>
+      <th>41</th>
+      <td>D</td>
+      <td>END</td>
+      <td>NAC</td>
+      <td>BAM</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>...</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>NaN</td>
+    </tr>
+  </tbody>
+</table>
+<p>3 rows × 12529 columns</p>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a column with dates, select columns and filter values on interest</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>list_statinfo <span class="op">=</span> [<span class="st">'AVG'</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>list_currency <span class="op">=</span> [<span class="st">'AUD'</span>, <span class="st">'BRL'</span>, <span class="st">'CAD'</span>, <span class="st">'CHF'</span>, <span class="st">'CNY'</span>, <span class="st">'CZK'</span>, <span class="st">'GBP'</span>, <span class="st">'HUF'</span>, <span class="st">'IDR'</span>, <span class="st">'JPY'</span>, <span class="st">'MXN'</span>, <span class="st">'NZD'</span>, <span class="st">'PLN'</span>, <span class="st">'TRY'</span>, <span class="st">'USD'</span>, <span class="st">'ZAR'</span>]</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>df_daily.rename(columns <span class="op">=</span> {<span class="st">'currency</span><span class="ch">\\</span><span class="st">TIME_PERIOD'</span>: <span class="st">'currency'</span>}, inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>df_daily <span class="op">=</span> df_daily[(df_daily[<span class="st">'statinfo'</span>].isin(list_statinfo)) <span class="op">&amp;</span> <span class="op">\</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>     (df_daily[<span class="st">'currency'</span>].isin(list_currency))]</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>df_daily.drop(columns <span class="op">=</span> [<span class="st">'unit'</span>, <span class="st">'statinfo'</span>, <span class="st">'freq'</span>], inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>df_daily <span class="op">=</span> pd.melt(df_daily, id_vars <span class="op">=</span> [<span class="st">'currency'</span>], var_name <span class="op">=</span> <span class="st">'date'</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_daily.tail(<span class="dv">3</span>))</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_daily.dtypes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       currency        date    value
+200397      TRY  2023-01-20  20.3566
+200398      USD  2023-01-20   1.0826
+200399      ZAR  2023-01-20  18.5770
+currency     object
+date         object
+value       float64
+dtype: object</code></pre>
+</div>
+</div>
+<div class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform date into the correct format and place currencies in columns</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>df_daily[<span class="st">'date'</span>] <span class="op">=</span> df_daily[<span class="st">'date'</span>].<span class="bu">apply</span>(<span class="kw">lambda</span> x: datetime.strptime(x, <span class="st">'%Y-%m-</span><span class="sc">%d</span><span class="st">'</span>))</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>df_daily.set_index([<span class="st">'date'</span>, <span class="st">'currency'</span>], inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>df_daily <span class="op">=</span> df_daily.unstack()</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>df_daily <span class="op">=</span> df_daily.droplevel(level<span class="op">=</span><span class="dv">0</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>df_daily.tail(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
 
 <div>
 
@@ -281,7 +406,6 @@ x_{t} = \alpha_{x} + \beta_{x} USD_{t} + \varepsilon_{t},
       <th>CHF</th>
       <th>CNY</th>
       <th>CZK</th>
-      <th>EUR</th>
       <th>GBP</th>
       <th>HUF</th>
       <th>IDR</th>
@@ -290,6 +414,7 @@ x_{t} = \alpha_{x} + \beta_{x} USD_{t} + \varepsilon_{t},
       <th>NZD</th>
       <th>PLN</th>
       <th>TRY</th>
+      <th>USD</th>
       <th>ZAR</th>
     </tr>
     <tr>
@@ -314,104 +439,203 @@ x_{t} = \alpha_{x} + \beta_{x} USD_{t} + \varepsilon_{t},
   </thead>
   <tbody>
     <tr>
-      <th>2022-09</th>
-      <td>0.059950</td>
-      <td>0.047810</td>
-      <td>0.048542</td>
-      <td>0.001242</td>
-      <td>0.032115</td>
-      <td>0.025810</td>
-      <td>0.025851</td>
-      <td>0.052859</td>
-      <td>0.075208</td>
-      <td>0.026772</td>
-      <td>0.042786</td>
-      <td>-0.002841</td>
-      <td>0.079589</td>
-      <td>0.051887</td>
-      <td>0.020165</td>
-      <td>0.054018</td>
+      <th>2023-01-18</th>
+      <td>1.5413</td>
+      <td>5.5252</td>
+      <td>1.4505</td>
+      <td>0.9906</td>
+      <td>7.3193</td>
+      <td>23.954</td>
+      <td>0.87530</td>
+      <td>396.15</td>
+      <td>16307.20</td>
+      <td>139.79</td>
+      <td>20.2193</td>
+      <td>1.6683</td>
+      <td>4.6983</td>
+      <td>20.3706</td>
+      <td>1.0839</td>
+      <td>18.3960</td>
     </tr>
     <tr>
-      <th>2022-10</th>
-      <td>0.012801</td>
-      <td>-0.014687</td>
-      <td>-0.005591</td>
-      <td>0.020690</td>
-      <td>0.025950</td>
-      <td>-0.019187</td>
-      <td>-0.016744</td>
-      <td>-0.041075</td>
-      <td>-0.045926</td>
-      <td>0.024687</td>
-      <td>0.027813</td>
-      <td>-0.013094</td>
-      <td>-0.021209</td>
-      <td>-0.045096</td>
-      <td>0.003488</td>
-      <td>0.019047</td>
+      <th>2023-01-19</th>
+      <td>1.5726</td>
+      <td>5.6326</td>
+      <td>1.4603</td>
+      <td>0.9921</td>
+      <td>7.3424</td>
+      <td>23.924</td>
+      <td>0.87648</td>
+      <td>396.43</td>
+      <td>16429.66</td>
+      <td>139.02</td>
+      <td>20.5437</td>
+      <td>1.6978</td>
+      <td>4.7063</td>
+      <td>20.3295</td>
+      <td>1.0815</td>
+      <td>18.6931</td>
     </tr>
     <tr>
-      <th>2022-11</th>
-      <td>-0.050925</td>
-      <td>-0.001570</td>
-      <td>-0.011532</td>
-      <td>-0.051361</td>
-      <td>-0.030573</td>
-      <td>-0.050379</td>
-      <td>-0.044526</td>
-      <td>-0.040387</td>
-      <td>-0.047441</td>
-      <td>0.003728</td>
-      <td>-0.064750</td>
-      <td>-0.030038</td>
-      <td>-0.070510</td>
-      <td>-0.053657</td>
-      <td>0.000881</td>
-      <td>-0.075902</td>
-    </tr>
-    <tr>
-      <th>2022-12</th>
-      <td>-0.010287</td>
-      <td>-0.003815</td>
-      <td>0.001882</td>
-      <td>-0.027880</td>
-      <td>-0.025268</td>
-      <td>-0.036063</td>
-      <td>-0.027189</td>
-      <td>-0.002388</td>
-      <td>-0.045126</td>
-      <td>-0.012362</td>
-      <td>-0.051597</td>
-      <td>0.013884</td>
-      <td>-0.017598</td>
-      <td>-0.023580</td>
-      <td>0.004592</td>
-      <td>0.001690</td>
-    </tr>
-    <tr>
-      <th>2023-01</th>
-      <td>-0.019425</td>
-      <td>-0.016789</td>
-      <td>-0.005023</td>
-      <td>-0.003273</td>
-      <td>-0.016881</td>
-      <td>-0.022705</td>
-      <td>-0.014779</td>
-      <td>-0.026921</td>
-      <td>-0.027043</td>
-      <td>-0.023853</td>
-      <td>-0.013378</td>
-      <td>-0.032234</td>
-      <td>-0.011612</td>
-      <td>-0.008633</td>
-      <td>0.004550</td>
-      <td>0.011263</td>
+      <th>2023-01-20</th>
+      <td>1.5619</td>
+      <td>5.6271</td>
+      <td>1.4583</td>
+      <td>0.9962</td>
+      <td>7.3425</td>
+      <td>23.922</td>
+      <td>0.87600</td>
+      <td>395.88</td>
+      <td>16367.67</td>
+      <td>140.86</td>
+      <td>20.4865</td>
+      <td>1.6852</td>
+      <td>4.7100</td>
+      <td>20.3566</td>
+      <td>1.0826</td>
+      <td>18.5770</td>
     </tr>
   </tbody>
 </table>
 </div>
 </div>
+</div>
+<div class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Put all currencies with respect to the USD (we downloaded currencies with respect to the EUR)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df_daily[<span class="st">'EUR'</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>df_daily <span class="op">=</span> df_daily.mul(<span class="dv">1</span> <span class="op">/</span> df_daily.loc[:,<span class="st">'USD'</span>], axis <span class="op">=</span> <span class="dv">0</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>df_daily.drop(<span class="st">'USD'</span>, axis <span class="op">=</span> <span class="dv">1</span>, inplace <span class="op">=</span> <span class="va">True</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>df_daily.tail(<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th>currency</th>
+      <th>AUD</th>
+      <th>BRL</th>
+      <th>CAD</th>
+      <th>CHF</th>
+      <th>CNY</th>
+      <th>CZK</th>
+      <th>GBP</th>
+      <th>HUF</th>
+      <th>IDR</th>
+      <th>JPY</th>
+      <th>MXN</th>
+      <th>NZD</th>
+      <th>PLN</th>
+      <th>TRY</th>
+      <th>ZAR</th>
+      <th>EUR</th>
+    </tr>
+    <tr>
+      <th>date</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>2023-01-18</th>
+      <td>1.421995</td>
+      <td>5.097518</td>
+      <td>1.338223</td>
+      <td>0.913922</td>
+      <td>6.752745</td>
+      <td>22.099825</td>
+      <td>0.807547</td>
+      <td>365.485746</td>
+      <td>15044.930344</td>
+      <td>128.969462</td>
+      <td>18.654212</td>
+      <td>1.539164</td>
+      <td>4.334625</td>
+      <td>18.793800</td>
+      <td>16.972045</td>
+      <td>0.922594</td>
+    </tr>
+    <tr>
+      <th>2023-01-19</th>
+      <td>1.454092</td>
+      <td>5.208137</td>
+      <td>1.350254</td>
+      <td>0.917337</td>
+      <td>6.789089</td>
+      <td>22.121128</td>
+      <td>0.810430</td>
+      <td>366.555710</td>
+      <td>15191.548775</td>
+      <td>128.543689</td>
+      <td>18.995562</td>
+      <td>1.569857</td>
+      <td>4.351641</td>
+      <td>18.797503</td>
+      <td>17.284420</td>
+      <td>0.924642</td>
+    </tr>
+    <tr>
+      <th>2023-01-20</th>
+      <td>1.442730</td>
+      <td>5.197765</td>
+      <td>1.347035</td>
+      <td>0.920192</td>
+      <td>6.782283</td>
+      <td>22.096804</td>
+      <td>0.809163</td>
+      <td>365.675226</td>
+      <td>15118.852762</td>
+      <td>130.112692</td>
+      <td>18.923425</td>
+      <td>1.556623</td>
+      <td>4.350637</td>
+      <td>18.803436</td>
+      <td>17.159616</td>
+      <td>0.923702</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Dictionary with dataframes for analysis</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>freq_list <span class="op">=</span> [<span class="st">'W'</span>, <span class="st">'M'</span>, <span class="st">'Q'</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>df_dict <span class="op">=</span> {<span class="st">'D'</span>: df_daily.pct_change().dropna()}</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resample_data(df, freq):</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    df_resampled <span class="op">=</span> df.resample(freq) <span class="op">\</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        .last() <span class="op">\</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        .pct_change() <span class="op">\</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        .dropna() <span class="op">\</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>        .to_period(freq)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_resampled</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>df_dict.update({freq: resample_data(df_daily, freq) <span class="cf">for</span> freq <span class="kw">in</span> freq_list})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
