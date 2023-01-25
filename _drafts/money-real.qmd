@@ -1,0 +1,22 @@
+---
+layout: post
+title: "The real counterpaties of the value of Money"
+#date: 
+description: Real drivers of changes in the value of Money - domestically (Inflation) and externally (Foreign Exchange Rate)
+#img:  
+---
+
+### Closed Economy
+
+Inflation is necessary to transfer real resources from Money holders to Money issuers.
+
+If production falls, inflation rises because the same amount of Money commands access fewer real assets and their nominal value increases.
+
+
+### Open Economy
+
+The exchange rate represents how much goods can be traded across regions.
+
+If production falls in one region, that region commands fewer real assets and their nominal value must rise with respect to another region via an exchange rate depreciation.
+
+It is also important to think the relationship between inflation and exchange rate depreciations.
