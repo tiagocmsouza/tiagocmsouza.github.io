@@ -10,13 +10,23 @@ description: Real drivers of changes in the value of Money - domestically (Infla
 
 Inflation is necessary to transfer real resources from Money holders to Money issuers.
 
-If production falls, inflation rises because the same amount of Money commands access fewer real assets and their nominal value increases.
+If production falls, inflation rises because the same amount of Money commands fewer real assets and their nominal value increases.
+
+What happens if demand falls?
+
+Inflation-linked debt cannot be paid with a resdistribution via inflation, only hight taxes.
+
+Imagine a scenario in which the cost of some good increases (can be a negative productivity shock, a rise in price of an international commodity) but the government freezes its price. This implies a worse structural fiscal stance. This represents a duality between inflation and fiscal. Higher prices means that people's resources acess less goods but the governemt is compensating for it. But in real terms, the government has to take these resources from somewhere.
 
 
 ### Open Economy
 
 The exchange rate represents how much goods can be traded across regions.
 
+It might be more useful to think without money, focusing on the real resources available to the countries and treir relationship with consumption.
+
 If production falls in one region, that region commands fewer real assets and their nominal value must rise with respect to another region via an exchange rate depreciation.
 
-It is also important to think the relationship between inflation and exchange rate depreciations.
+It is also important to think about the relationship between inflation and exchange rate depreciations. In a setting with no Money, they may represent the same phenomena.
+
+If less goods are produced in a region, then this region have acess to less foreign goods. Imports must fall, be it via reduction in demand (with prices fixed?) or via inflation (and a depreciation in the exchange rate). Thinking about it, if lower production is concentrated in a sector then prices should not move (assuming that this sector has not influence over aggregate supply), whereas if is more widespread then a currency depreciation (inflation with respect to a foreign good) is necessary.

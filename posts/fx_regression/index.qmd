@@ -1,5 +1,5 @@
 ---
-title: "Currency Beta's with respect to the USD"
+title: "Currency Beta's with respect to the EURUSD"
 author: "Tiago Souza"
 date: "2023-01-20"
 categories: [econometrics, python]
@@ -14,13 +14,13 @@ from datetime import datetime
 import statsmodels.api as sm
 ```
 
-This post is to check whether noise in daily data constitutes a problem to the estimation of currenies' sensitivity with respect to the $USD$, a common exercise done in financial markets.
+This post is to check whether noise in daily data constitutes a problem in estimating currenies' sensitivity with respect to the $EURUSD$, a common exercise done in financial markets.
 
-Assume that there exists a relationship of currency $x_{t}$  with repect to the $USD$ on a dily basis:
+Assume that there exists a relationship of currency $x_{t}$  with repect to the $EURUSD$ on a dily basis:
 
 $$
 \begin{aligned}
-x_{t} = \alpha_{x} + \beta_{x} USD_{t} + \varepsilon_{t},
+x_{t} = \alpha_{x} + \beta_{x} EURUSD_{t} + \varepsilon_{t},
 \end{aligned}
 $$
 
@@ -29,24 +29,24 @@ this equation could be estimated to find the parameters of interest (a statistic
 Remeber that the estimated coefficient is given by the simple formula:
 $$
 \begin{aligned}
-\beta_{x} = \frac{\text{cov}(x_{t}, USD_{t})}{\text{var}(USD_{t})}.
+\beta_{x} = \frac{\text{cov}(x_{t}, EURUSD_{t})}{\text{var}(EURUSD_{t})}.
 \end{aligned}
 $$
 
-However, estimating this coefficint this way may face difficulties given the large variance of daily data.  Given that, taken the parameters as fixed, nothing prevents one from resampling the data into a different frequency:
+However, estimating it this way may face difficulties given the large variance of daily data. Given that, taken the parameters as fixed, nothing prevents one from resampling the data into a different frequency:
 
 $$
 \begin{aligned}
 \frac{1}{T}\sum_{t = 1}^{T}{x_{t}} & = \frac{1}{T}\sum_{t = 1}^{T}{\alpha_{x}} + \frac{1}{T}\sum_{t = 1}^{T}{\beta_{x} USD_{t}} + \frac{1}{T}\sum_{t = 1}^{T}{\varepsilon_{t}} \\
 \quad{} \\
-& \Rightarrow x_{T} = \alpha_{x} + \beta_{x} USD_{T} + \varepsilon_{T}
+& \Rightarrow x_{T} = \alpha_{x} + \beta_{x} USD_{T} + \varepsilon_{T},
 \end{aligned}
 $$
 
-Our taks now is to test whether running the regressions over different sample frequencies yields distinct estimated coefficients.
+and estimating this instead. Our taks now is to test whether running the regressions over different sample frequencies yields distinct estimated coefficients and the extent to which using daily data represents a problem.
 
 ```{python}
-# Download and first inspection 
+# Download and first inspection of data
 
 df_daily = eurostat.get_data_df('ert_bil_eur_d', flags=False)
 
@@ -57,7 +57,7 @@ df_daily.tail(3)
 # Create a column with dates, select columns and filter values on interest
 
 list_statinfo = ['AVG']
-list_currency = ['AUD', 'BRL', 'CAD', 'CHF', 'CNY', 'CZK', 'GBP', 'HUF', 'IDR', 'JPY', 'MXN', 'NZD', 'PLN', 'TRY', 'USD', 'ZAR']
+list_currency = ['AUD', 'CHF', 'CZK', 'DKK', 'GBP', 'HUF', 'JPY', 'NOK', 'NZD', 'PLN', 'TRY', 'SEK', 'USD']
 
 df_daily.rename(columns = {'currency\\TIME_PERIOD': 'currency'}, inplace = True)
 
@@ -74,7 +74,7 @@ print(df_daily.dtypes)
 ```
 
 ```{python}
-# Put date into the correct format and place currencies in columns
+# Date into the correct format and place currencies in columns
 
 df_daily['date'] = df_daily['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
 
@@ -88,7 +88,7 @@ df_daily.tail(3)
 ```
 
 ```{python}
-# Put all currencies with respect to the USD (we downloaded currencies with respect to the EUR)
+# Pll currencies with respect to the USD (we downloaded currencies with respect to the EUR)
 
 df_daily['EUR'] = 1
 
@@ -117,4 +117,28 @@ def resample_data(df, freq):
     return df_resampled
 
 df_dict.update({freq: resample_data(df_daily, freq) for freq in freq_list})
+```
+
+```{python}
+# Run regressions for every currency and frequency
+# Note that statsmodels handles multiple Y's separately
+
+coeffs = []
+
+for freq, data in df_dict.items():
+
+    data_x = sm.add_constant(data['EUR'])
+    data_y = data.drop(columns=['EUR'])
+    models = sm.OLS(data_y, data_x).fit()
+    params = models.params.T[['EUR']].set_index(data_y.columns)
+    params.rename(columns={'EUR': freq}, inplace=True)
+    coeffs.append(params)
+
+coeffs = pd.concat(coeffs, axis='columns')
+coeffs.tail(3)
+```
+
+```{python}
+test = coeffs.div(coeffs['D'], axis='rows')
+test
 ```
