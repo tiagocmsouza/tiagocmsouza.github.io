@@ -17,9 +17,9 @@
   {
     "listing": "/projects.html",
     "items": [
-      "/posts-proj/fx-regression/index.html",
-      "/posts-proj/fx-decomp/index.html",
-      "/posts-proj/bayesian-reg/index.html"
+      "/projects/fx-regression/index.html",
+      "/projects/fx-decomp/index.html",
+      "/projects/bayesian-reg/index.html"
     ]
   }
 ]
