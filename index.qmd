@@ -1,15 +1,18 @@
 ---
-title: "Presentation"
-image: profile.jpg
+title: Tiago Souza
+image: images/profile.jpg
 about:
   template: broadside
   links:
     - icon: linkedin
       text: LinkeIn
-      href: https://linkedin.com
+      href: https://www.linkedin.com/in/tiago-souza/
     - icon: github
       text: Github
-      href: https://github.com
+      href: https://github.com/tiagocmsouza
+    - icon: envelope
+      text: Contact me
+      href: mailto:tiagocmsouza@gmail.com
 
 ---
 

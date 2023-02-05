@@ -2,18 +2,39 @@ project:
   type: website
 
 website:
-  title: "Just an Economist"
+  title: Just an Economist
+  favicon: images/profile.jpg
   navbar:
+    left:
+      - text: Home
+        href: index.qmd
+      - text: Projects
+        href: projects.qmd
+      - text: Theory
+        href: theory.qmd
+      - text: Resume
+        href: resume.qmd
     right:
-      - index.qmd 
-      - blog.qmd
       - icon: github
-        href: https://github.com/
-      - icon: LinkedIn
-        href: https://linkedin.com
+        href: https://github.com/tiagocmsouza
+      - icon: linkedin
+        href: https://www.linkedin.com/in/tiago-souza/
+
+  page-footer: 
+    left: |
+      [Contact Tiago Souza](mailto:tiagocmsouza@gmail.com)
+    right: |
+      [Github Code Repo](https://github.com/tiagocmsouza)
+    background: "#04162d"
 
 format:
   html:
     theme: flatly
     mainfont: system-ui
     css: styles.scss
+    code-link: true
+    code-fold: show
+    code-tools: true
+    code-block-bg: true
+    code-block-border-left: black
+    highlight-style: arrow

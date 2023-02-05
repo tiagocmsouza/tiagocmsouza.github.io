@@ -59,12 +59,12 @@ df_daily.tail(3)
 list_statinfo = ['AVG']
 list_currency = ['AUD', 'CHF', 'CZK', 'DKK', 'GBP', 'HUF', 'JPY', 'NOK', 'NZD', 'PLN', 'TRY', 'SEK', 'USD']
 
-df_daily.rename(columns = {'currency\\TIME_PERIOD': 'currency'}, inplace = True)
+df_daily = df_daily.rename(columns = {'currency\\TIME_PERIOD': 'currency'})
 
-df_daily = df_daily[(df_daily['statinfo'].isin(list_statinfo)) & \
+df_daily = df_daily[(df_daily['statinfo'].isin(list_statinfo)) &
      (df_daily['currency'].isin(list_currency))]
 
-df_daily.drop(columns = ['unit', 'statinfo', 'freq'], inplace = True)
+df_daily = df_daily.drop(columns = ['unit', 'statinfo', 'freq'])
 
 df_daily = pd.melt(df_daily, id_vars = ['currency'], var_name = 'date')
 
@@ -78,11 +78,9 @@ print(df_daily.dtypes)
 
 df_daily['date'] = df_daily['date'].apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
 
-df_daily.set_index(['date', 'currency'], inplace = True)
-
-df_daily = df_daily.unstack()
-
-df_daily = df_daily.droplevel(level=0, axis=1)
+df_daily = (df_daily.set_index(['date', 'currency'])
+            .unstack()
+            .droplevel(level=0, axis=1))
 
 df_daily.tail(3)
 ```
@@ -92,9 +90,8 @@ df_daily.tail(3)
 
 df_daily['EUR'] = 1
 
-df_daily = df_daily.mul(1 / df_daily.loc[:,'USD'], axis = 0)
-
-df_daily.drop('USD', axis = 1, inplace = True)
+df_daily = (df_daily.mul(1 / df_daily.loc[:,'USD'], axis = 0)
+            .drop('USD', axis = 1))
 
 df_daily.tail(3)
 ```
@@ -108,11 +105,11 @@ df_dict = {'D': df_daily.pct_change().dropna()}
 
 def resample_data(df, freq):
     
-    df_resampled = df.resample(freq) \
-        .last() \
-        .pct_change() \
-        .dropna() \
-        .to_period(freq)
+    df_resampled = (df.resample(freq)
+                    .last()
+                    .pct_change()
+                    .dropna()
+                    .to_period(freq))
 
     return df_resampled
 
@@ -130,8 +127,8 @@ for freq, data in df_dict.items():
     data_x = sm.add_constant(data['EUR'])
     data_y = data.drop(columns=['EUR'])
     models = sm.OLS(data_y, data_x).fit()
-    params = models.params.T[['EUR']].set_index(data_y.columns)
-    params.rename(columns={'EUR': freq}, inplace=True)
+    params = (models.params.T[['EUR']].set_index(data_y.columns)
+                .rename(columns={'EUR': freq}))
     coeffs.append(params)
 
 coeffs = pd.concat(coeffs, axis='columns')
@@ -139,6 +136,9 @@ coeffs.tail(3)
 ```
 
 ```{python}
-test = coeffs.div(coeffs['D'], axis='rows')
-test
+coeffs_plot = (coeffs.div(coeffs['D'], axis='rows')
+                .drop(columns=['D']))
+            
+coeffs_plot.plot(kind='density')
+coeffs_plot.plot(kind='box')
 ```

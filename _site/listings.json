@@ -13,5 +13,13 @@
       "/posts/fx_decomp/index.html",
       "/posts/bayesian_regression/index.html"
     ]
+  },
+  {
+    "listing": "/projects.html",
+    "items": [
+      "/posts-proj/fx-regression/index.html",
+      "/posts-proj/fx-decomp/index.html",
+      "/posts-proj/bayesian-reg/index.html"
+    ]
   }
 ]
