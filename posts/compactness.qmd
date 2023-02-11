@@ -1,0 +1,26 @@
+---
+layout: post
+title: "Compactness"
+bibliography: references.bib
+#date: 
+#description: 
+#img:  
+---
+
+## Compactness - Why is it so important?
+
+@hewitt1960role views that compactness is a generalization of finitness and argue that compactness is an essential hypothesis in theorems in analysis. He does that by showing that many propositions of analysis are trivial for finite sets, true and reasonably simple ofr infinite compact sets but either false or extremely difficult to prove for noncompact sets.
+
+He brings typical results in analysis by stating and proving them for finite and infinite compact sets, while giving a counter-example in the non-compact case. Some of the results are the *Weierstrass extreme value theorem* , the *Weierstrass approximation theorem* , the *Riesz representation theorem* (for which he states that countable additivity of the measure that gives the integral representation of the functional depends entirely upon the compactness of the [metric] space. In the non-compact case the functionals do have integral representations, but with respect to finitely and not always countably additive measures, which are of little use since the main theorems of integration theory [Fubini's theorem, for example] are in general false for finitely additive measures).
+
+Also interesting is to clarify that the follwoing three properties are equivalent definitions of compact space in metric spaces:
+
+    1. Let $\{x_{i}\}$ be a sequence of points such that every $x_{i}$ belongs to a space $X$. Then there is a subsequence $\{x_{i_{k}}\}$ of the original sequence that converges to a limit $x \in C$.
+
+    2. Every infinite subset of $X$ has at least one limit point lying in $C$
+
+    3. For every open cover of $X$, there exists a finite subcover.
+
+Compactness for the most general topological spaces exhibits peculiarities not found in metric spaces, and properties 1 and 2 need reformulations to become equivalent to 3. Nevertheless, the theorems cited above remain true for all compact topological spaces, where proofs carry out without change replacing the space for an arbitrary compact space - excect fot the *Weierstrass extreme value theorem*, but a nearly trivial substitute proof using open coverings can be supplied.
+
+Moreover, he discusses that perhaps as important is the role played by compactness in existence theorems. The general idea is the following. Suppose a collection of objects $X$ of some sort (measures, functions, linear functionals, etc), a metric and compact space for simplicity. One wishes to show the existence of one of the objects $x$ having a certain property $P$, often of numerical character. Suppose that one can find a sequence $\{x_{i}\}$ of objects in $X$ that comes closer to having the property $P$. The, extracting from this sequence a subsequence $\{x_{i_{k}}\}$ with limit $x \in X$, one can often show that $x$ actually has the property $P$. The argument is a more sophisticated if $X$ is a compact not metric space, but the intuition is the same.

@@ -18,6 +18,14 @@ Inflation-linked debt cannot be paid with a resdistribution via inflation, only 
 
 Imagine a scenario in which the cost of some good increases (can be a negative productivity shock, a rise in price of an international commodity) but the government freezes its price. This implies a worse structural fiscal stance. This represents a duality between inflation and fiscal. Higher prices means that people's resources acess less goods but the governemt is compensating for it. But in real terms, the government has to take these resources from somewhere.
 
+Interest rates can be interpreted as tranferring resources from the tax payers to bondholders. In a closed economy, what happens?
+
+Imagine giving the amount of money existing in the economy to one person. She now controls ore resources and inflation is a natural way to make that distribution.
+
+Is there a relationship between able to spend extra money printed first and being the first in line to purchase goods with a price cap? Resourcces go to people that not necessarily value it the most.
+
+One empirical test would be that wages negotiations would depend of past inflation instead of forward looking inflation only; would be a mixture of both.
+
 
 ### Open Economy
 
@@ -30,3 +38,5 @@ If production falls in one region, that region commands fewer real assets and th
 It is also important to think about the relationship between inflation and exchange rate depreciations. In a setting with no Money, they may represent the same phenomena.
 
 If less goods are produced in a region, then this region have acess to less foreign goods. Imports must fall, be it via reduction in demand (with prices fixed?) or via inflation (and a depreciation in the exchange rate). Thinking about it, if lower production is concentrated in a sector then prices should not move (assuming that this sector has not influence over aggregate supply), whereas if is more widespread then a currency depreciation (inflation with respect to a foreign good) is necessary.
+
+Why does higher interest rates generates an appreciation of the excahnge rate? I imagine that a similar mechanism of the closed economt, but some foreigners must hold he bond.

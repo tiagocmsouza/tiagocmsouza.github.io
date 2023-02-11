@@ -5,7 +5,7 @@ about:
   template: broadside
   links:
     - icon: linkedin
-      text: LinkeIn
+      text: LinkedIn
       href: https://www.linkedin.com/in/tiago-souza/
     - icon: github
       text: Github
