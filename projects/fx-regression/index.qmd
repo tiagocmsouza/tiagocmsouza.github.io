@@ -57,7 +57,9 @@ df_daily.tail(3)
 # Create a column with dates, select columns and filter values on interest
 
 list_statinfo = ['AVG']
-list_currency = ['AUD', 'CHF', 'CZK', 'DKK', 'GBP', 'HUF', 'JPY', 'NOK', 'NZD', 'PLN', 'TRY', 'SEK', 'USD']
+list_currencies = df_daily['currency\TIME_PERIOD'].unique()
+list_currencies = np.delete(list_currencies, np.where(list_currencies == 'ALL'))
+# list_currency = ['AUD', 'CHF', 'CZK', 'DKK', 'GBP', 'HUF', 'JPY', 'NOK', 'NZD', 'PLN', 'TRY', 'SEK', 'USD']
 
 df_daily = df_daily.rename(columns = {'currency\\TIME_PERIOD': 'currency'})
 
@@ -141,4 +143,20 @@ coeffs_plot = (coeffs.div(coeffs['D'], axis='rows')
             
 coeffs_plot.plot(kind='density')
 coeffs_plot.plot(kind='box')
+```
+
+```{python}
+covariance = []
+varianace = []
+
+for freq, data in df_dict.items():
+
+    data_cov = data.cov()
+    cov = data_cov[['EUR']] / data_cov[['EUR']].loc['EUR']
+    cov = cov.drop('EUR').rename(columns={'EUR': freq})
+    covariance.append(cov)
+
+    var = pd.DataFrame(np.diagonal(data_cov), index=data_cov.index, columns=freq)
+    var = var.drop('EUR')
+    variance.append(var)
 ```

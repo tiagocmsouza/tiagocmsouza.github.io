@@ -39,4 +39,4 @@ It is also important to think about the relationship between inflation and excha
 
 If less goods are produced in a region, then this region have acess to less foreign goods. Imports must fall, be it via reduction in demand (with prices fixed?) or via inflation (and a depreciation in the exchange rate). Thinking about it, if lower production is concentrated in a sector then prices should not move (assuming that this sector has not influence over aggregate supply), whereas if is more widespread then a currency depreciation (inflation with respect to a foreign good) is necessary.
 
-Why does higher interest rates generates an appreciation of the excahnge rate? I imagine that a similar mechanism of the closed economt, but some foreigners must hold he bond.
+Why does higher interest rate generates an appreciation of the excahnge rate? I imagine that a similar mechanism of the closed economt, but some foreigners must hold he bond.
